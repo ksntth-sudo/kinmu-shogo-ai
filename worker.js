@@ -56,7 +56,20 @@ preview(roster,"rp");preview(orders,"op");
 async function toDataURL(file){return new Promise((resolve,reject)=>{const r=new FileReader();r.onload=()=>resolve(r.result);r.onerror=reject;r.readAsDataURL(file);});}
 function esc(s){return String(s??"").replace(/[&<>"]/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[m]))}
 document.getElementById("analyze").onclick=async()=>{if(!roster.files[0]||!orders.files.length){alert("勤務表と命令簿の画像を選択してください。");return;}loading.style.display="block";analyze.disabled=true;try{const payload={roster:await toDataURL(roster.files[0]),orders:await Promise.all([...orders.files].map(toDataURL))};const res=await fetch("/api/analyze",{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify(payload)});const data=await res.json();if(!res.ok)throw new Error(data.error||"解析に失敗しました");render(data);}catch(e){summary.textContent="エラー："+e.message;}finally{loading.style.display="none";analyze.disabled=false;}};
-function render(data){const rows=data.rows||[],tb=document.getElementById("tb");tb.innerHTML="";let ok=0,w=0,ng=0;rows.forEach(r=>{const j=r.judgement||"要確認";if(j==="正常")ok++;else if(j==="不一致")ng++;else w++;const cls=j==="正常"?"ok":j==="不一致"?"ng":"warn";const tr=document.createElement("tr");tr.innerHTML=`<td>${esc(r.name)}</td><td>${esc(r.roster_shift)}</td><td>${esc(r.order_shift)}</td><td>${esc(r.start_time)}</td><td><span class="badge ${cls}">${esc(j)}</span></td><td>${esc(r.reason)}</td>`;tb.appendChild(tr);});okc.textContent=ok;wc.textContent=w;ngc.textContent=ng;summary.textContent=data.summary||`正常 ${ok}件／要確認 ${w}件／不一致 ${ng}件`;}
+function render(data){const rows=data.rows||[],tb=document.getElementById("tb");tb.innerHTML="";let ok=0,w=0,ng=0;rows.forEach(r=>{const j=r.judgement||"要確認";if(j==="正常")ok++;else if(j==="不一致")ng++;else w++;const cls=j==="正常"?"ok":j==="不一致"?"ng":"warn";const tr=document.createElement("tr");["name","roster_shift","order_shift","start_time"].forEach(k=>{
+  const td=document.createElement("td");
+  td.textContent=r[k]||"";
+  tr.appendChild(td);
+});
+const tdJudge=document.createElement("td");
+const span=document.createElement("span");
+span.className="badge "+cls;
+span.textContent=j;
+tdJudge.appendChild(span);
+tr.appendChild(tdJudge);
+const tdReason=document.createElement("td");
+tdReason.textContent=r.reason||"";
+tr.appendChild(tdReason);tb.appendChild(tr);});okc.textContent=ok;wc.textContent=w;ngc.textContent=ng;summary.textContent=data.summary||`正常 ${ok}件／要確認 ${w}件／不一致 ${ng}件`;}
 </script>
 </body></html>`;
 
