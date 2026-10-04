@@ -69,7 +69,7 @@ tdJudge.appendChild(span);
 tr.appendChild(tdJudge);
 const tdReason=document.createElement("td");
 tdReason.textContent=r.reason||"";
-tr.appendChild(tdReason);tb.appendChild(tr);});okc.textContent=ok;wc.textContent=w;ngc.textContent=ng;summary.textContent=data.summary||`正常 ${ok}件／要確認 ${w}件／不一致 ${ng}件`;}
+tr.appendChild(tdReason);tb.appendChild(tr);});okc.textContent=ok;wc.textContent=w;ngc.textContent=ng;summary.textContent=data.summary||("正常 "+ok+"件／要確認 "+w+"件／不一致 "+ng+"件");}
 </script>
 </body></html>`;
 
